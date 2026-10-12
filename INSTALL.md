@@ -13,15 +13,15 @@
 ```bash
 BASE=~/.claude/skills   # подставьте нужный путь из таблицы
 for s in full-cycle-website design-system; do
-  mkdir -p "$BASE/$s" && curl -fsSL "https://raw.githubusercontent.com/Xhiveee/web-skill/main/$s/SKILL.md" -o "$BASE/$s/SKILL.md"
+  mkdir -p "$BASE/$s" && curl -fsSL "https://raw.githubusercontent.com/Xhiveee/web-skills/main/$s/SKILL.md" -o "$BASE/$s/SKILL.md"
 done
 ```
 
 ## Через git
 
 ```bash
-git clone https://github.com/Xhiveee/web-skill.git /tmp/web-skill
-cp -r /tmp/web-skill/full-cycle-website /tmp/web-skill/design-system ~/.cursor/skills/   # или другой путь из таблицы
+git clone https://github.com/Xhiveee/web-skills.git /tmp/web-skills
+cp -r /tmp/web-skills/full-cycle-website /tmp/web-skills/design-system ~/.cursor/skills/   # или другой путь из таблицы
 ```
 
 ## Другие агенты
