@@ -1,30 +1,30 @@
-# Installation
+# Установка
 
-Each skill is a folder containing a `SKILL.md` file. Copy the folders you need into your agent's skills directory.
+Каждый скилл — папка с файлом `SKILL.md`. Положите нужные папки в каталог скиллов вашего агента.
 
-| Agent | Per project | All projects |
+| Агент | В проект | Для всех проектов |
 |---|---|---|
 | Cursor | `.cursor/skills/` | `~/.cursor/skills/` |
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Codex CLI | — | `~/.codex/skills/` |
 
-## One skill via curl
+## Один скилл через curl
 
 ```bash
-BASE=~/.claude/skills   # pick the path you need from the table
-S=design-system         # skill name from the README
+BASE=~/.claude/skills   # подставьте нужный путь из таблицы
+S=design-system         # имя скилла из README
 mkdir -p "$BASE/$S" && curl -fsSL "https://raw.githubusercontent.com/Xhiveee/skills/main/$S/SKILL.md" -o "$BASE/$S/SKILL.md"
 ```
 
-## All skills via git
+## Все скиллы через git
 
 ```bash
 git clone https://github.com/Xhiveee/skills.git /tmp/skills
-for d in /tmp/skills/*/; do [ -f "$d/SKILL.md" ] && cp -r "$d" ~/.cursor/skills/; done   # or another path from the table
+for d in /tmp/skills/*/; do [ -f "$d/SKILL.md" ] && cp -r "$d" ~/.cursor/skills/; done   # или другой путь из таблицы
 ```
 
-## Other agents
+## Другие агенты
 
-If your agent doesn't support skills, paste the contents of `SKILL.md` into the project's `AGENTS.md` or into the system prompt.
+Если агент не поддерживает скиллы, добавьте содержимое `SKILL.md` в `AGENTS.md` проекта или в системный промпт.
 
-Restart the agent after installing.
+После установки перезапустите агента.

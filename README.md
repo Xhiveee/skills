@@ -1,12 +1,12 @@
 # skills
 
-My skills for AI agents (Cursor, Claude Code, Codex, and others). Each skill is a folder with a `SKILL.md`.
+Мои скиллы для ИИ-агентов (Cursor, Claude Code, Codex и др.). Каждый скилл — папка с `SKILL.md`.
 
-| Skill | What it's for |
+| Скилл | Для чего |
 |---|---|
-| [full-cycle-website](full-cycle-website/SKILL.md) | Turnkey website: code, SEO, API docs, Docker, CI/CD, NGINX/Caddy, deploy key, updates via `curl` |
-| [design-system](design-system/SKILL.md) | Design for anything, without AI slop; produces a `DESIGN.md` |
+| [full-cycle-website](full-cycle-website/SKILL.md) | Сайт под ключ: код, SEO, API-доки, Docker, CI/CD, NGINX/Caddy, deploy key, обновление через `curl` |
+| [design-system](design-system/SKILL.md) | Дизайн чего угодно без ИИ-слопа, на выходе `DESIGN.md` |
 
-Installation: [INSTALL.md](INSTALL.md)
+Установка: [INSTALL.md](INSTALL.md)
 
-License: [MIT](LICENSE)
+Лицензия: [MIT](LICENSE)
