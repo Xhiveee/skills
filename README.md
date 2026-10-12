@@ -1,19 +1,11 @@
-# web-skills
+# skills
 
-Скиллы для ИИ-агентов: сайт под ключ и дизайн без ИИ-слопа.
+Мои скиллы для ИИ-агентов (Cursor, Claude Code, Codex и др.). Каждый скилл — папка с `SKILL.md`.
 
-**[full-cycle-website](full-cycle-website/SKILL.md)** — автономная разработка сайта, а не только код:
-- Код по `DESIGN.md`, SEO (`robots.txt`, `sitemap.xml`, OG, JSON-LD)
-- Документация API, Git, семантические версии, CI/CD
-- Docker и ручная установка на VPS/VDS/Dedicated
-- NGINX/Caddy с учётом уже работающих на сервере сайтов
-- Deploy key и скрипт обновления через `curl` с автооткатом
-
-**[design-system](design-system/SKILL.md)** — дизайн для чего угодно (веб, приложения, презентации, печать, соцсети, бренд):
-- Бриф, референсы и концепция до выбора цветов и шрифтов
-- Анти-слоп список и тест на шаблонность
-- Типографика, цвет с проверкой контраста, сетка, иконки, движение, доступность
-- На выходе `DESIGN.md` с токенами, который использует `full-cycle-website`
+| Скилл | Для чего |
+|---|---|
+| [full-cycle-website](full-cycle-website/SKILL.md) | Сайт под ключ: код, SEO, API-доки, Docker, CI/CD, NGINX/Caddy, deploy key, обновление через `curl` |
+| [design-system](design-system/SKILL.md) | Дизайн чего угодно без ИИ-слопа, на выходе `DESIGN.md` |
 
 Установка: [INSTALL.md](INSTALL.md)
 

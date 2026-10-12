@@ -1,6 +1,6 @@
 # Установка
 
-Каждый скилл — это папка с файлом `SKILL.md` (`full-cycle-website`, `design-system`). Положите нужные папки в каталог скиллов вашего агента.
+Каждый скилл — папка с файлом `SKILL.md`. Положите нужные папки в каталог скиллов вашего агента.
 
 | Агент | В проект | Для всех проектов |
 |---|---|---|
@@ -8,24 +8,23 @@
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Codex CLI | — | `~/.codex/skills/` |
 
-## Через curl
+## Один скилл через curl
 
 ```bash
 BASE=~/.claude/skills   # подставьте нужный путь из таблицы
-for s in full-cycle-website design-system; do
-  mkdir -p "$BASE/$s" && curl -fsSL "https://raw.githubusercontent.com/Xhiveee/web-skills/main/$s/SKILL.md" -o "$BASE/$s/SKILL.md"
-done
+S=design-system         # имя скилла из README
+mkdir -p "$BASE/$S" && curl -fsSL "https://raw.githubusercontent.com/Xhiveee/skills/main/$S/SKILL.md" -o "$BASE/$S/SKILL.md"
 ```
 
-## Через git
+## Все скиллы через git
 
 ```bash
-git clone https://github.com/Xhiveee/web-skills.git /tmp/web-skills
-cp -r /tmp/web-skills/full-cycle-website /tmp/web-skills/design-system ~/.cursor/skills/   # или другой путь из таблицы
+git clone https://github.com/Xhiveee/skills.git /tmp/skills
+for d in /tmp/skills/*/; do [ -f "$d/SKILL.md" ] && cp -r "$d" ~/.cursor/skills/; done   # или другой путь из таблицы
 ```
 
 ## Другие агенты
 
 Если агент не поддерживает скиллы, добавьте содержимое `SKILL.md` в `AGENTS.md` проекта или в системный промпт.
 
-После установки перезапустите агента и попросите, например: «Сделай дизайн по скиллу design-system, потом сайт по full-cycle-website».
+После установки перезапустите агента.
