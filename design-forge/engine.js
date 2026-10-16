@@ -358,9 +358,16 @@
     const ctrlRad = Math.max(0, Math.round(rad * 0.6));
     const lines = [];
     lines.push(`/* ${g.name} — ${g.label} (seed: ${g.seed}) */`);
+    const st = semanticTokens(p);
     lines.push(`${sc || ":root"} {`);
-    lines.push(`  --bg: ${p.bg}; --surface: ${p.surface}; --ink: ${p.ink};`);
-    lines.push(`  --muted: ${p.muted}; --accent: ${p.accent}; --accent-2: ${p.accent2}; --line: ${p.line};`);
+    lines.push(`  /* semantic layer */`);
+    lines.push(`  --bg-base: ${st.bgBase}; --bg-subtle: ${st.bgSubtle}; --bg-elevated: ${st.bgElevated};`);
+    lines.push(`  --text-primary: ${st.textPrimary}; --text-secondary: ${st.textSecondary}; --text-muted: ${st.textMuted};`);
+    lines.push(`  --border-dim: ${st.borderDim}; --border-subtle: ${st.borderSubtle}; --border-focus: ${st.borderFocus};`);
+    lines.push(`  --accent: ${st.accent}; --accent-fg: ${st.accentFg}; --accent-2: ${st.accent2};`);
+    lines.push(`  /* legacy aliases — kept so older components keep working */`);
+    lines.push(`  --bg: var(--bg-base); --surface: var(--bg-elevated); --ink: var(--text-primary);`);
+    lines.push(`  --muted: var(--text-muted); --line: var(--border-subtle);`);
     lines.push(`  --font-display: ${t.display.stack};`);
     lines.push(`  --font-body: ${t.body.stack};`);
     lines.push(`  --font-mono: ${t.mono.stack};`);
@@ -371,7 +378,7 @@
     lines.push(`}`);
     lines.push("");
     lines.push(`${sc} body, ${sc} .df-body {`);
-    lines.push(`  background: var(--bg); color: var(--ink);`);
+    lines.push(`  background: var(--bg-base); color: var(--text-primary);`);
     lines.push(`  font-family: var(--font-body); font-size: 16px; line-height: 1.55;`);
     if (g.texture.css && !g.texture.css.startsWith("background:")) lines.push(`  ${g.texture.css};`);
     lines.push(`}`);
@@ -382,16 +389,16 @@
     lines.push(`${sc} h1 { font-size: calc(1rem * pow(var(--type-ratio), 5)); }`);
     lines.push(`${sc} h2 { font-size: calc(1rem * pow(var(--type-ratio), 3)); }`);
     lines.push(`${sc} h3 { font-size: calc(1rem * pow(var(--type-ratio), 2)); }`);
-    lines.push(`${sc} .df-label, ${sc} small, ${sc} caption { font-family: var(--font-mono); font-size: .75rem; letter-spacing: ${t.trackingL}; text-transform: uppercase; color: var(--muted); }`);
+    lines.push(`${sc} .df-label, ${sc} small, ${sc} caption { font-family: var(--font-mono); font-size: .75rem; letter-spacing: ${t.trackingL}; text-transform: uppercase; color: var(--text-muted); }`);
     lines.push(`${sc} code, ${sc} pre { font-family: var(--font-mono); }`);
     lines.push(`${sc} a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }`);
     lines.push(`${sc} ::selection { background: var(--accent); color: var(--bg); }`);
     lines.push("");
     lines.push(`${sc} .df-card {`);
-    lines.push(`  background: var(--surface);`);
+    lines.push(`  background: var(--bg-elevated);`);
     lines.push(`  padding: calc(var(--space) * 3);`);
     lines.push(`  border-radius: var(--radius);`);
-    if (g.border.style !== "none") lines.push(`  border: ${g.border.width}px ${g.border.style} var(--line);`);
+    if (g.border.style !== "none") lines.push(`  border: ${g.border.width}px ${g.border.style} var(--border-subtle);`);
     if (g.shadow.css !== "none") lines.push(`  box-shadow: var(--shadow);`);
     lines.push(`  transition: all var(--dur) var(--ease);`);
     lines.push(`}`);
@@ -401,24 +408,24 @@
     lines.push(`  font: 600 .95rem var(--font-body); letter-spacing: .02em;`);
     lines.push(`  border-radius: var(--radius-ctrl); cursor: pointer;`);
     lines.push(`  transition: all var(--dur) var(--ease);`);
-    if (g.border.style !== "none") lines.push(`  border: ${g.border.width}px ${g.border.style} var(--line);`);
+    if (g.border.style !== "none") lines.push(`  border: ${g.border.width}px ${g.border.style} var(--border-subtle);`);
     else lines.push(`  border: none;`);
     lines.push(`}`);
-    lines.push(`${sc} .df-btn--primary { background: var(--accent); color: ${bestTextOn(p.accent, p.ink)}; ${g.shadow.css !== "none" && g.shadow.name !== "glow" ? "box-shadow: var(--shadow);" : ""} }`);
-    lines.push(`${sc} .df-btn--ghost { background: transparent; color: var(--ink); border-color: var(--line); }`);
+    lines.push(`${sc} .df-btn--primary { background: var(--accent); color: var(--accent-fg); ${g.shadow.css !== "none" && g.shadow.name !== "glow" ? "box-shadow: var(--shadow);" : ""} }`);
+    lines.push(`${sc} .df-btn--ghost { background: transparent; color: var(--text-primary); border-color: var(--border-subtle); }`);
     lines.push("");
     lines.push(`${sc} .df-input {`);
     lines.push(`  padding: calc(var(--space) * 1.5); width: 100%; box-sizing: border-box;`);
-    lines.push(`  font: inherit; color: var(--ink); background: var(--surface);`);
-    lines.push(`  border: ${Math.max(1, g.border.width)}px ${g.border.style === "none" ? "solid" : g.border.style} var(--line);`);
+    lines.push(`  font: inherit; color: var(--text-primary); background: var(--bg-elevated);`);
+    lines.push(`  border: ${Math.max(1, g.border.width)}px ${g.border.style === "none" ? "solid" : g.border.style} var(--border-subtle);`);
     lines.push(`  border-radius: var(--radius-ctrl);`);
     lines.push(`}`);
-    lines.push(`${sc} .df-input:focus-visible, ${sc} .df-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }`);
+    lines.push(`${sc} .df-input:focus-visible, ${sc} .df-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }`);
     lines.push("");
     lines.push(`${sc} .df-badge {`);
     lines.push(`  font-family: var(--font-mono); font-size: .72rem; letter-spacing: ${t.trackingL}; text-transform: uppercase;`);
     lines.push(`  padding: 3px 10px; border-radius: ${g.key === "soft" || g.key === "vapor" ? "999px" : "var(--radius-ctrl)"};`);
-    lines.push(`  border: 1px ${g.border.style === "none" ? "solid" : g.border.style} var(--line); color: var(--muted);`);
+    lines.push(`  border: 1px ${g.border.style === "none" ? "solid" : g.border.style} var(--border-subtle); color: var(--text-muted);`);
     lines.push(`}`);
     lines.push("");
     lines.push(`/* Signature details — ${g.label}: */`);
@@ -441,8 +448,41 @@
   /* pick the button label color with the best WCAG contrast: palette ink vs white */
   function bestTextOn(bgHex, inkHex) {
     if (!bgHex || !bgHex.startsWith("#")) return "#ffffff";
-    const dark = inkHex && inkHex.startsWith("#") ? inkHex : "#111111";
-    return contrastRatio(bgHex, "#ffffff") >= contrastRatio(bgHex, dark) ? "#ffffff" : dark;
+    const ink = inkHex && inkHex.startsWith("#") ? inkHex : "#111111";
+    let best = ink, bestC = 0;
+    for (const c of [ink, "#ffffff", "#111111"]) {
+      const cr = contrastRatio(bgHex, c);
+      if (cr > bestC) { bestC = cr; best = c; }
+    }
+    return best;
+  }
+  function rgbToHex(r, g, b) {
+    const f = v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, "0");
+    return "#" + f(r) + f(g) + f(b);
+  }
+  function mixHex(a, b, t) {
+    const A = hexRgb(a), B = hexRgb(b);
+    return rgbToHex(A.r + (B.r - A.r) * t, A.g + (B.g - A.g) * t, A.b + (B.b - A.b) * t);
+  }
+  const hexOnly = c => typeof c === "string" && c.startsWith("#");
+
+  /* map a genome palette onto the semantic token layer required by SKILL.md */
+  function semanticTokens(p) {
+    return {
+      bgBase: p.bg,
+      bgSubtle: hexOnly(p.bg) && hexOnly(p.surface) ? mixHex(p.bg, p.surface, 0.5)
+        : hexOnly(p.bg) ? shiftL(p.bg, 0.03) : p.surface,
+      bgElevated: p.surface,
+      textPrimary: p.ink,
+      textSecondary: hexOnly(p.ink) && hexOnly(p.muted) ? mixHex(p.ink, p.muted, 0.5) : p.muted,
+      textMuted: p.muted,
+      borderDim: hexOnly(p.ink) ? rgba(p.ink, 0.12) : p.line,
+      borderSubtle: p.line,
+      borderFocus: p.accent,
+      accent: p.accent,
+      accentFg: bestTextOn(p.accent, p.ink),
+      accent2: p.accent2,
+    };
   }
 
   function toPrompt(g) {
@@ -494,10 +534,17 @@
     const cfg = {
       theme: {
         extend: {
-          colors: {
-            bg: p.bg, surface: p.surface, ink: p.ink, muted: p.muted,
-            accent: p.accent, "accent-2": p.accent2, line: p.line,
-          },
+          colors: (() => {
+            const st = semanticTokens(p);
+            return {
+              "bg-base": st.bgBase, "bg-subtle": st.bgSubtle, "bg-elevated": st.bgElevated,
+              "text-primary": st.textPrimary, "text-secondary": st.textSecondary, "text-muted": st.textMuted,
+              "border-dim": st.borderDim, "border-subtle": st.borderSubtle, "border-focus": st.borderFocus,
+              accent: st.accent, "accent-fg": st.accentFg, "accent-2": st.accent2,
+              // legacy aliases
+              bg: st.bgBase, surface: st.bgElevated, ink: st.textPrimary, muted: st.textMuted, line: st.borderSubtle,
+            };
+          })(),
           fontFamily: {
             display: t.display.stack.split(",").map(s => s.trim().replace(/^'(.*)'$/, "$1")),
             body: t.body.stack.split(",").map(s => s.trim().replace(/^'(.*)'$/, "$1")),
