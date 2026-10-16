@@ -492,7 +492,10 @@
     L.push(`Seed: ${g.seed}. Reproduce exactly: ` + "`node design-forge.mjs --seed " + g.seed + (g.forcedArchetype ? " --archetype " + g.forcedArchetype : "") + "`");
     L.push("");
     L.push(`You are generating the frontend for this product. Obey this contract literally;`);
-    L.push(`it exists so the result does not look like a generic AI template.`);
+    L.push(`it exists so the result does not look like a generic AI template — and so it`);
+    L.push(`does not collapse into your default "well-crafted editorial/magazine" taste.`);
+    L.push(`The archetype below is the art direction; your own aesthetic preferences are`);
+    L.push(`irrelevant here. The result must be recognizable as THIS archetype.`);
     L.push(`Mood: ${g.mood.join(", ")}.`);
     L.push("");
     L.push(`## Palette (${p.scheme})`);
