@@ -21,19 +21,19 @@ Without constraints an LLM emits the default-template look. Design Forge determi
 ## Procedure (run BEFORE any markup)
 
 1. **Pick a seed.** Default: the project/repo slug or task slug (e.g. `acme-shop`, `billing-dashboard`). Same seed = same genome, so the design is reproducible across sessions and PRs. Do not ask the user for a seed unless they offered one.
-2. **Generate the contract** from this skill's directory:
+2. **Generate the contract.** `design-forge.mjs` and `engine.js` sit in the same folder as this SKILL.md — resolve that folder's absolute path yourself (e.g. the skill install dir), then run:
 
    ```bash
-   node "$SKILL_DIR/design-forge.mjs" --seed <seed> --format prompt
+   node <skill-dir>/design-forge.mjs --seed <seed> --format prompt
    ```
 
-   `$SKILL_DIR` is the folder containing this SKILL.md (`design-forge.mjs` and `engine.js` sit next to it; Node ≥16, zero dependencies).
+   Node ≥16, zero dependencies. If `design-forge.mjs` is missing next to SKILL.md, the skill was installed incompletely — fetch all files of the `design-forge/` folder (see INSTALL.md, "multi-file skills").
 3. **Restate the contract** in one paragraph in your plan/reply — this locks the decision in.
 4. **Export tokens** into the project:
 
    ```bash
-   node "$SKILL_DIR/design-forge.mjs" --seed <seed> --format css      --out design-tokens.css
-   node "$SKILL_DIR/design-forge.mjs" --seed <seed> --format tailwind --out design-tailwind.js   # Tailwind projects
+   node <skill-dir>/design-forge.mjs --seed <seed> --format css      --out design-tokens.css
+   node <skill-dir>/design-forge.mjs --seed <seed> --format tailwind --out design-tailwind.js   # Tailwind projects
    ```
 
 5. **Build UI to the contract.** Implement ALL signature details, honor every item in "Hard prohibitions". If a request or existing code conflicts with the contract, the contract wins — surface the conflict to the user.
