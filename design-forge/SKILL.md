@@ -163,6 +163,7 @@ Run through this list; every item must be yes.
 - [ ] Semantic tokens used everywhere; themes defined per genome (both themes, or its single permitted theme); accent is single.
 - [ ] Every interactive element has all six states including `focus-visible` and `loading`.
 - [ ] Motion matches the genome's spec, or the 150–200ms default budget when the genome is silent.
+- [ ] `prefers-reduced-motion` honored — non-essential motion disabled/reduced for users who request it.
 
 **Copy**
 - [ ] No generic strings anywhere; buttons are verb+object; empty states have a CTA; data looks real.
