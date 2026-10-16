@@ -45,11 +45,20 @@ Without constraints an LLM emits the default-template look. Design Forge does tw
 
 Editorial Grid · International/Swiss · Neo-Brutalist · Soft Product · Terminal/CRT · Organic/Craft · Luxury/Atelier · Technical Blueprint · Vapor/Dream · Risograph/Print. Each is a generator within the style's own bounds — palette, type pairing and details are seeded-random, never a fixed preset.
 
+## The genome is the art director — you are the implementer
+
+Your own taste is overridden for this task. Two consequences:
+
+- **"Well-crafted" is not a style.** The default craft aesthetic — oversized editorial serif, magazine whitespace, cream/ink minimal palette, soft "premium" mood — is *also a template*. It is forbidden unless the generated archetype actually calls for it (Editorial Grid, Luxury). A Terminal, Brutalist or Blueprint build that reads as a design-blog landing has failed the contract.
+- **The build must be recognizable as its archetype.** If a reviewer couldn't tell which archetype generated it from a screenshot alone, the genome wasn't applied — regardless of how polished the result is. Signature details are the identity: at least 3 must be visibly present in the delivered UI.
+
+The invariants below are construction rules. They add **zero visual style** — they decide whether the build is sound, never what it looks like.
+
 ---
 
 # Invariant rules (apply to EVERY genome)
 
-The genome randomizes direction; these rules never change. A genome may *tighten* them (its "Hard prohibitions" win), never loosen them.
+The genome randomizes direction; these rules never change. They govern *construction quality* only — tokens, states, scales, copy — and add no visual style of their own (no extra serif, no extra whitespace, no "premium" mood). A genome may *tighten* them (its "Hard prohibitions" win), never loosen them.
 
 ## 1. Anti-slop directives
 
@@ -59,6 +68,7 @@ The genome randomizes direction; these rules never change. A genome may *tighten
 - `rounded-2xl`-style uniform rounding applied to everything without a radius philosophy. Radius comes from the genome's scale (card = R, control = R×0.6, chip = full or 0) — nothing else.
 - Card-in-card hell: a bordered/surface panel nested inside another surface panel. If content needs grouping, use spacing, hairline dividers, or a `bg-subtle` tint — never a second card.
 - `backdrop-blur` color blobs over a dark background with no functional role (navigation, layering). Glass is only allowed when the genome says so and when it separates layers that actually overlap.
+- The "default well-crafted" look: giant editorial serif + huge whitespace + cream/beige palette + luxe minimalism applied to every archetype. Quality is mandatory, this *look* is not — style comes only from the genome.
 
 **Forbidden defaults:**
 
@@ -152,6 +162,7 @@ Run through this list; every item must be yes.
 - [ ] Genome was generated (seed recorded as `/* design-forge seed: <seed> */` in code/PR) and restated in the plan.
 - [ ] Palette, fonts, radius, shadows come from the genome — not improvised.
 - [ ] Every signature detail implemented; no genome prohibition violated.
+- [ ] A screenshot alone would identify the archetype — the result could not pass for Editorial/Lux default unless the genome actually is one.
 
 **Anti-slop**
 - [ ] No Inter/Roboto default, no decoration-only gradients or blurs, no card-in-card, radius follows the token scale.
@@ -172,5 +183,6 @@ Run through this list; every item must be yes.
 
 - Designing "as usual" and retrofitting the contract afterwards.
 - Taking only part of the genome ("just the palette") — the contract is a whole.
+- Applying the invariants as a *style*: treating "well-crafted" as direction and sanding the genome's edges back into the safe editorial default.
 - Rerolling seeds for a "prettier" outcome without reason; if the user wants options, generate a couple of seeds and let them choose.
 - Satisfying the letter of the rules while reintroducing slop (e.g. one accent *plus* five "status" colors that look identical; 200ms transitions that are technically legal but applied to everything, so the UI never stops moving).
