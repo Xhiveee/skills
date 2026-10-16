@@ -117,7 +117,7 @@ Every output uses a **semantic token layer**, never raw hex sprinkled through co
 ```
 
 - **Single accent.** One accent carries all interactive meaning. No rainbow of badge colors; status semantics (success/warn/error) get muted, desaturated tones distinct from the accent.
-- **Dark + light.** Define both themes behind the same custom properties (`[data-theme="dark"]` or `prefers-color-scheme`); components reference tokens only, so theming is a token swap, not a restyle.
+- **Dark + light.** Define both themes behind the same custom properties (`[data-theme="dark"]` or `prefers-color-scheme`); components reference tokens only, so theming is a token swap, not a restyle. Exception: genomes that forbid one mode (e.g. Terminal bans light, Risograph bans dark) ship their single permitted theme through the same tokens — never force a theme the genome prohibits.
 - **Contrast:** text pairs ≥4.5:1 (body), ≥3:1 (large text, icons, focus ring).
 
 ## 4. Interaction states & micro-interactions
@@ -133,7 +133,7 @@ Every output uses a **semantic token layer**, never raw hex sprinkled through co
 | `disabled` | reduced opacity (~0.5), `cursor: not-allowed`, no hover effect |
 | `loading` | busy indicator, width held stable (no layout jump), action disabled |
 
-**Motion budget:** transitions 150–200ms, `ease-out` or `cubic-bezier(0.16, 1, 0.3, 1)`. Forbidden: slow drifting/floating effects, `ease-in-out` everywhere, animation as decoration. Motion may *loosen* only when the genome explicitly defines a slower language (e.g. Vapor, Luxury) — and then it applies consistently.
+**Motion budget:** transitions 150–200ms, `ease-out` or `cubic-bezier(0.16, 1, 0.3, 1)` — the *default* for genomes without a motion spec. A genome's own motion spec always wins in either direction (Terminal's 80ms linear, Brutalist's steps, Vapor/Luxury's slower language are valid because they are part of the contract). Forbidden regardless of genome: slow drifting/floating decoration, `ease-in-out` slapped on everything, motion without a functional role.
 
 ## 5. UX copy
 
@@ -160,9 +160,9 @@ Run through this list; every item must be yes.
 **System**
 - [ ] Font sizes only from the modular scale; line-heights per role table.
 - [ ] All spacing is multiples of 4/8 — grep for `[0-9]px` outliers.
-- [ ] Semantic tokens used everywhere; both themes defined; accent is single.
+- [ ] Semantic tokens used everywhere; themes defined per genome (both themes, or its single permitted theme); accent is single.
 - [ ] Every interactive element has all six states including `focus-visible` and `loading`.
-- [ ] Motion within 150–200ms (or the genome's own, consistent, language).
+- [ ] Motion matches the genome's spec, or the 150–200ms default budget when the genome is silent.
 
 **Copy**
 - [ ] No generic strings anywhere; buttons are verb+object; empty states have a CTA; data looks real.
