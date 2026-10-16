@@ -16,6 +16,18 @@ S=design-system         # имя скилла из README
 mkdir -p "$BASE/$S" && curl -fsSL "https://raw.githubusercontent.com/Xhiveee/skills/main/$S/SKILL.md" -o "$BASE/$S/SKILL.md"
 ```
 
+### Multi-file skills
+
+Некоторые скиллы содержат не только `SKILL.md` — скачайте папку целиком, иначе часть функциональности не установится. Удобнее всего через tarball репозитория (работает без API и токена):
+
+```bash
+BASE=~/.claude/skills   # подставьте нужный путь из таблицы
+S=design-forge          # имя скилла из README
+mkdir -p "$BASE"
+curl -fsSL "https://github.com/Xhiveee/skills/archive/refs/heads/main.tar.gz" \
+  | tar -xz -C "$BASE" --strip-components=1 "skills-main/$S"
+```
+
 ## Все скиллы через git
 
 ```bash

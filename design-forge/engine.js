@@ -336,6 +336,7 @@
     const key = opts.archetype && ARCHETYPES[opts.archetype] ? opts.archetype : pick(r, ARCH_KEYS);
     const g = ARCHETYPES[key](r);
     g.seed = seed;
+    if (opts.archetype && ARCHETYPES[opts.archetype]) g.forcedArchetype = key;
     g.name = pick(r, NAME_A) + " " + pick(r, NAME_B);
     g.type.ratioName = RATIO_NAMES[String(g.type.ratio)] || String(g.type.ratio);
     // resolve cssFn into css
@@ -403,7 +404,7 @@
     if (g.border.style !== "none") lines.push(`  border: ${g.border.width}px ${g.border.style} var(--line);`);
     else lines.push(`  border: none;`);
     lines.push(`}`);
-    lines.push(`${sc} .df-btn--primary { background: var(--accent); color: ${isLight(p.accent) ? "#111" : "#fff"}; ${g.shadow.css !== "none" && g.shadow.name !== "glow" ? "box-shadow: var(--shadow);" : ""} }`);
+    lines.push(`${sc} .df-btn--primary { background: var(--accent); color: ${bestTextOn(p.accent, p.ink)}; ${g.shadow.css !== "none" && g.shadow.name !== "glow" ? "box-shadow: var(--shadow);" : ""} }`);
     lines.push(`${sc} .df-btn--ghost { background: transparent; color: var(--ink); border-color: var(--line); }`);
     lines.push("");
     lines.push(`${sc} .df-input {`);
@@ -427,17 +428,28 @@
     return lines.join("\n");
   }
 
-  function isLight(hex) {
-    if (!hex || hex.startsWith("rgba")) return false;
+  function relLum(hex) {
     const { r, g, b } = hexRgb(hex);
-    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
+    const f = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+  }
+  function contrastRatio(a, b) {
+    const la = relLum(a), lb = relLum(b);
+    const [l1, l2] = la > lb ? [la, lb] : [lb, la];
+    return (l1 + 0.05) / (l2 + 0.05);
+  }
+  /* pick the button label color with the best WCAG contrast: palette ink vs white */
+  function bestTextOn(bgHex, inkHex) {
+    if (!bgHex || !bgHex.startsWith("#")) return "#ffffff";
+    const dark = inkHex && inkHex.startsWith("#") ? inkHex : "#111111";
+    return contrastRatio(bgHex, "#ffffff") >= contrastRatio(bgHex, dark) ? "#ffffff" : dark;
   }
 
   function toPrompt(g) {
     const p = g.palette, t = g.type;
     const L = [];
     L.push(`# Design contract: «${g.name}» (${g.label})`);
-    L.push(`Seed: ${g.seed}. Reproduce exactly: ` + "`node design-forge.mjs --seed " + g.seed + "`");
+    L.push(`Seed: ${g.seed}. Reproduce exactly: ` + "`node design-forge.mjs --seed " + g.seed + (g.forcedArchetype ? " --archetype " + g.forcedArchetype : "") + "`");
     L.push("");
     L.push(`You are generating the frontend for this product. Obey this contract literally;`);
     L.push(`it exists so the result does not look like a generic AI template.`);
