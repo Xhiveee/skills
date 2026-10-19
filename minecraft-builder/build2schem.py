@@ -2,32 +2,51 @@
 """Convert an mcbuilder .build blueprint into a Sponge Schematic v2 (.schem).
 
 Usage: python build2schem.py house.build [house.schem]
-Blueprint lines: "dx dy dz [namespace:]block"; "origin"/"@player" lines are
-ignored for the schematic (the offset is stored in the schem's Offset field).
+Blueprint lines: "dx dy dz [namespace:]block"; "origin X Y Z" shifts the
+schem's Offset; "@player" is ignored (the schem is paste-anchored).
 Output is gzip NBT loadable by WorldEdit (//schem load) and Litematica.
 """
 import gzip
+import os
 import re
 import struct
 import sys
 
 
+def die(path, lineno, msg):
+    raise SystemExit(f"{path}:{lineno}: {msg}")
+
+
+def parse_ints(parts, path, lineno):
+    try:
+        return tuple(int(p) for p in parts)
+    except ValueError:
+        die(path, lineno, f"non-integer coordinate in: {' '.join(parts)!r}")
+
+
 def parse_blueprint(path):
     blocks = []
+    origin = (0, 0, 0)
     with open(path) as f:
-        for raw in f:
-            line = raw.strip()
-            if not line or line.startswith("#"):
-                continue
-            if line.lower().startswith("origin ") or line.lower() == "@player":
+        for lineno, raw in enumerate(f, 1):
+            line = raw.split("#", 1)[0].strip()
+            if not line:
                 continue
             parts = line.split()
-            if len(parts) != 4:
-                continue
-            dx, dy, dz = (int(p) for p in parts[:3])
-            name = parts[3] if ":" in parts[3] else "minecraft:" + parts[3]
-            blocks.append((dx, dy, dz, name))
-    return blocks
+            head = parts[0].lower()
+            if head == "origin":
+                if len(parts) != 4:
+                    die(path, lineno, "expected 'origin X Y Z'")
+                origin = parse_ints(parts[1:], path, lineno)
+            elif head == "@player":
+                continue  # paste-anchored instead; see SKILL.md
+            else:
+                if len(parts) != 4:
+                    die(path, lineno, f"malformed line: {raw.strip()!r}")
+                dx, dy, dz = parse_ints(parts[:3], path, lineno)
+                name = parts[3] if ":" in parts[3] else "minecraft:" + parts[3]
+                blocks.append((dx, dy, dz, name))
+    return blocks, origin
 
 
 # --- minimal NBT writer (big-endian, Java edition) ---
@@ -77,7 +96,7 @@ def varint(v):
             return bytes(out)
 
 
-def build_schem(blocks, meta_name):
+def build_schem(blocks, meta_name, origin=(0, 0, 0)):
     if not blocks:
         raise SystemExit("no blocks in blueprint")
     xs = [b[0] for b in blocks]
@@ -112,7 +131,7 @@ def build_schem(blocks, meta_name):
         + tag_short("Width", w)
         + tag_short("Height", h)
         + tag_short("Length", l)
-        + tag_int_array("Offset", [minx, miny, minz])
+        + tag_int_array("Offset", [minx + origin[0], miny + origin[1], minz + origin[2]])
         + tag_int("PaletteMax", len(palette))
         + tag_compound("Palette", pal_payload)
         + tag_byte_array("BlockData", block_data)
@@ -125,8 +144,10 @@ def build_schem(blocks, meta_name):
 def main():
     src = sys.argv[1]
     dst = sys.argv[2] if len(sys.argv) > 2 else re.sub(r"\.build$", "", src) + ".schem"
-    blocks = parse_blueprint(src)
-    nbt = build_schem(blocks, re.sub(r".*[\\/]", "", dst))
+    if os.path.abspath(src) == os.path.abspath(dst):
+        raise SystemExit("output path must differ from input")
+    blocks, origin = parse_blueprint(src)
+    nbt = build_schem(blocks, re.sub(r".*[\\/]", "", dst), origin)
     with gzip.open(dst, "wb") as f:
         f.write(nbt)
     print(f"wrote {dst}: {len(blocks)} blocks")
