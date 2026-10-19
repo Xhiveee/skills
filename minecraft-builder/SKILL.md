@@ -14,90 +14,50 @@ Produces real `.schem` files (Sponge Schematic v2, gzip NBT) from code — no Mi
 
 ## Workflow
 
-1. Author a `.build` blueprint (or generate it with a script — see below).
-2. Convert: `python build2schem.py <file>.build [out.schem]`
+1. Write a small Python generator that builds a `blocks` list of `(dx, dy, dz, "namespace:block")` tuples.
+2. Call `write_schem(blocks, "out.schem")` from `build2schem.py` (ships next to this `SKILL.md` — resolve the directory containing the skill file and run scripts from there so the import works).
 3. Deliver the `.schem` to the user (goes into `<worldedit>/schematics/`).
 
-## Blueprint DSL (`.build`)
+```python
+from build2schem import write_schem
 
-One instruction per line; `#` comments and blank lines allowed.
+blocks = []
+for dx in range(-3, 4):
+    for dz in range(-3, 4):
+        for dy in range(0, 4):
+            wall = dx in (-3, 3) or dz in (-3, 3)
+            roof = dy == 3
+            if wall or roof:
+                blocks.append((dx, dy, dz, "minecraft:oak_planks"))
+blocks.append((0, 0, 0, "minecraft:glass"))  # skylight
 
+write_schem(blocks, "house.schem")
 ```
-origin X Y Z            # optional, recorded as the schem's Offset
-@player                 # ignored on export (paste-anchored instead)
-DX DY DZ [namespace:]block
-```
 
-- `DX DY DZ` are offsets from the origin (may be negative); later lines overwrite earlier ones at the same cell.
+Rules:
+
+- Coords are offsets (may be negative); duplicates at the same cell are fine — the last write wins. `write_schem(blocks, path, origin=(x, y, z))` shifts the schem's `Offset`.
 - `block` is a registry name; `stone` = `minecraft:stone`.
 - Default block states only — no stair orientation, no pane connections, no block entities. Design around it (use `minecraft:glass` blocks for windows).
 
-## Generating blueprints
-
-Write small Python generators, don't hand-type coordinates:
-
-```python
-lines = ["# my house", "@player"]
-for dx in range(-3, 4):
-    for dz in range(-3, 4):
-        lines.append(f"{dx} 4 {dz} minecraft:oak_planks")  # roof slab
-open("house.build", "w").write("\n".join(lines) + "\n")
-```
-
 ## build2schem.py
 
-Stdlib-only, ~120 lines, writes NBT by hand. Ships next to this `SKILL.md` in the same folder — resolve the directory containing the skill file and run `python build2schem.py` from there. Full source below for reference/repair. Verify output with `nbtlib` (`pip install nbtlib`): root must be a compound named `Schematic` with `Version=2`, `Palette`, `BlockData` (varint indices, order `(y*Length + z)*Width + x`), `Width/Height/Length` shorts, `Offset` int array.
+Stdlib-only, ~110 lines, writes NBT by hand. Full source below for reference/repair. Verify output with `nbtlib` (`pip install nbtlib`): root must be a compound named `Schematic` with `Version=2`, `Palette`, `BlockData` (varint indices, order `(y*Length + z)*Width + x`), `Width/Height/Length` shorts, `Offset` int array.
 
 ```python
 #!/usr/bin/env python3
-"""Convert an mcbuilder .build blueprint into a Sponge Schematic v2 (.schem).
+"""Write Minecraft structures as Sponge Schematic v2 (.schem) from Python.
 
-Usage: python build2schem.py house.build [house.schem]
-Blueprint lines: "dx dy dz [namespace:]block"; "origin X Y Z" shifts the
-schem's Offset; "@player" is ignored (the schem is paste-anchored).
+Usage:
+    from build2schem import write_schem
+    blocks = [(dx, dy, dz, "minecraft:stone"), ...]  # coords relative to origin
+    write_schem(blocks, "house.schem", origin=(0, 0, 0))
+
 Output is gzip NBT loadable by WorldEdit (//schem load) and Litematica.
 """
 import gzip
 import os
-import re
 import struct
-import sys
-
-
-def die(path, lineno, msg):
-    raise SystemExit(f"{path}:{lineno}: {msg}")
-
-
-def parse_ints(parts, path, lineno):
-    try:
-        return tuple(int(p) for p in parts)
-    except ValueError:
-        die(path, lineno, f"non-integer coordinate in: {' '.join(parts)!r}")
-
-
-def parse_blueprint(path):
-    blocks = []
-    origin = (0, 0, 0)
-    with open(path) as f:
-        for lineno, raw in enumerate(f, 1):
-            line = raw.split("#", 1)[0].strip()
-            if not line:
-                continue
-            parts = line.split()
-            head = parts[0].lower()
-            if head == "origin":
-                if len(parts) != 4:
-                    die(path, lineno, "expected 'origin X Y Z'")
-                origin = parse_ints(parts[1:], path, lineno)
-            elif head == "@player":
-                continue  # paste-anchored instead; see SKILL.md
-            else:
-                if len(parts) != 4:
-                    die(path, lineno, f"malformed line: {raw.strip()!r}")
-                dx, dy, dz = parse_ints(parts[:3], path, lineno)
-                name = parts[3] if ":" in parts[3] else "minecraft:" + parts[3]
-                blocks.append((dx, dy, dz, name))
-    return blocks, origin
 
 
 # --- minimal NBT writer (big-endian, Java edition) ---
@@ -149,7 +109,7 @@ def varint(v):
 
 def build_schem(blocks, meta_name, origin=(0, 0, 0)):
     if not blocks:
-        raise SystemExit("no blocks in blueprint")
+        raise SystemExit("no blocks given")
     xs = [b[0] for b in blocks]
     ys = [b[1] for b in blocks]
     zs = [b[2] for b in blocks]
@@ -163,6 +123,8 @@ def build_schem(blocks, meta_name, origin=(0, 0, 0)):
     # varints can exceed 1 byte; collect as list of bytes per cell
     cells = [b"\x00"] * (w * h * l)
     for dx, dy, dz, name in blocks:
+        if ":" not in name:
+            name = "minecraft:" + name
         if name not in palette:
             palette[name] = len(palette)
         idx = (dy - miny) * l * w + (dz - minz) * w + (dx - minx)
@@ -192,20 +154,11 @@ def build_schem(blocks, meta_name, origin=(0, 0, 0)):
     return tag_compound("Schematic", payload)
 
 
-def main():
-    src = sys.argv[1]
-    dst = sys.argv[2] if len(sys.argv) > 2 else re.sub(r"\.build$", "", src) + ".schem"
-    if os.path.abspath(src) == os.path.abspath(dst):
-        raise SystemExit("output path must differ from input")
-    blocks, origin = parse_blueprint(src)
-    nbt = build_schem(blocks, re.sub(r".*[\\/]", "", dst), origin)
-    with gzip.open(dst, "wb") as f:
+def write_schem(blocks, path, origin=(0, 0, 0), name=None):
+    nbt = build_schem(blocks, name or os.path.basename(path), origin)
+    with gzip.open(path, "wb") as f:
         f.write(nbt)
-    print(f"wrote {dst}: {len(blocks)} blocks")
-
-
-if __name__ == "__main__":
-    main()
+    print(f"wrote {path}: {len(blocks)} blocks")
 ```
 
 ## Format notes
